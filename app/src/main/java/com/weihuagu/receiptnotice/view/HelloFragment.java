@@ -1,10 +1,15 @@
 package com.weihuagu.receiptnotice.view;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +29,19 @@ public class HelloFragment extends Fragment {
     private TextView posturl;
     private TextView statusAlipay;
     private TextView statusWechat;
+    private TextView statusRoot;
     private Button btnCheckStatus;
+    private Button btnRequestRoot;
+
+    private CheckBox cbSelf;
+    private CheckBox cbAlipay;
+    private CheckBox cbWechat;
+    private TextView pidSelf;
+    private TextView pidAlipay;
+    private TextView pidWechat;
+    private LinearLayout keepaliveSection;
+    private View dividerKeepalive;
+
     private View rootview;
     private PreferenceUtil preference;
 
@@ -32,7 +49,7 @@ public class HelloFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootview=inflater.inflate(R.layout.fragment_hello,container, false);
+        rootview = inflater.inflate(R.layout.fragment_hello, container, false);
         return rootview;
     }
 
@@ -47,30 +64,65 @@ public class HelloFragment extends Fragment {
     public void onResume() {
         super.onResume();
         refreshAppStatus();
+        if (AppRunningUtil.isRootGranted()) {
+            doKeepAlive();
+        }
     }
 
-    private void initView(){
-        preference=new PreferenceUtil(getContext());
-        numofpush=(TextView)rootview.findViewById(R.id.numofpush);
+    private void initView() {
+        preference = new PreferenceUtil(getContext());
+        numofpush = (TextView) rootview.findViewById(R.id.numofpush);
         setTextWithNumofpush();
-        posturl=(TextView)rootview.findViewById(R.id.posturl);
+        posturl = (TextView) rootview.findViewById(R.id.posturl);
         setTextWithPosturl();
 
         statusAlipay = (TextView) rootview.findViewById(R.id.status_alipay);
         statusWechat = (TextView) rootview.findViewById(R.id.status_wechat);
-        btnCheckStatus = (Button) rootview.findViewById(R.id.btn_check_status);
+        statusRoot = (TextView) rootview.findViewById(R.id.status_root);
 
-        boolean rooted = AppRunningUtil.hasRootAccess();
-        if (rooted) {
-            btnCheckStatus.setText(getString(R.string.btn_check_and_launch));
-        }
+        keepaliveSection = (LinearLayout) rootview.findViewById(R.id.keepalive_section);
+        dividerKeepalive = rootview.findViewById(R.id.divider_keepalive);
+
+        cbSelf = (CheckBox) rootview.findViewById(R.id.cb_keepalive_self);
+        cbAlipay = (CheckBox) rootview.findViewById(R.id.cb_keepalive_alipay);
+        cbWechat = (CheckBox) rootview.findViewById(R.id.cb_keepalive_wechat);
+        pidSelf = (TextView) rootview.findViewById(R.id.pid_self);
+        pidAlipay = (TextView) rootview.findViewById(R.id.pid_alipay);
+        pidWechat = (TextView) rootview.findViewById(R.id.pid_wechat);
+
+        btnCheckStatus = (Button) rootview.findViewById(R.id.btn_check_status);
+        btnRequestRoot = (Button) rootview.findViewById(R.id.btn_request_root);
+
+        SharedPreferences sp = getPrefs();
+        cbSelf.setChecked(sp.getBoolean(AppRunningUtil.PREF_KA_SELF, false));
+        cbAlipay.setChecked(sp.getBoolean(AppRunningUtil.PREF_KA_ALIPAY, false));
+        cbWechat.setChecked(sp.getBoolean(AppRunningUtil.PREF_KA_WECHAT, false));
+
+        CompoundButton.OnCheckedChangeListener kaListener = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences.Editor editor = getPrefs().edit();
+                editor.putBoolean(AppRunningUtil.PREF_KA_SELF, cbSelf.isChecked());
+                editor.putBoolean(AppRunningUtil.PREF_KA_ALIPAY, cbAlipay.isChecked());
+                editor.putBoolean(AppRunningUtil.PREF_KA_WECHAT, cbWechat.isChecked());
+                editor.apply();
+
+                if (AppRunningUtil.isRootGranted()) {
+                    doKeepAlive();
+                }
+            }
+        };
+        cbSelf.setOnCheckedChangeListener(kaListener);
+        cbAlipay.setOnCheckedChangeListener(kaListener);
+        cbWechat.setOnCheckedChangeListener(kaListener);
 
         btnCheckStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (AppRunningUtil.hasRootAccess()) {
+                if (AppRunningUtil.isRootGranted()) {
                     refreshAppStatus();
                     launchInactiveApps();
+                    doKeepAlive();
                 } else if (!AppRunningUtil.hasUsageStatsPermission(getContext())) {
                     AppRunningUtil.requestUsageStatsPermission(getContext());
                     Toast.makeText(getContext(),
@@ -84,7 +136,114 @@ public class HelloFragment extends Fragment {
                 }
             }
         });
+
+        btnRequestRoot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (AppRunningUtil.isRootGranted()) {
+                    Toast.makeText(getContext(),
+                            getString(R.string.toast_root_already),
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                btnRequestRoot.setEnabled(false);
+                btnRequestRoot.setText(getString(R.string.btn_requesting_root));
+                Toast.makeText(getContext(),
+                        getString(R.string.toast_root_requesting),
+                        Toast.LENGTH_LONG).show();
+
+                AppRunningUtil.requestRootAsync(new AppRunningUtil.RootCallback() {
+                    @Override
+                    public void onResult(boolean hasRoot) {
+                        if (getContext() == null) return;
+                        btnRequestRoot.setEnabled(true);
+                        if (hasRoot) {
+                            onRootGranted();
+                        } else {
+                            btnRequestRoot.setText(getString(R.string.btn_request_root));
+                            statusRoot.setText(getString(R.string.status_root_denied));
+                            statusRoot.setTextColor(0xFFF44336);
+                            Toast.makeText(getContext(),
+                                    getString(R.string.toast_root_failed),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+            }
+        });
+
+        updateRootUI();
         refreshAppStatus();
+    }
+
+    private SharedPreferences getPrefs() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext());
+    }
+
+    private void onRootGranted() {
+        btnRequestRoot.setText(getString(R.string.btn_root_granted));
+        btnRequestRoot.setEnabled(false);
+        btnCheckStatus.setText(getString(R.string.btn_check_and_launch));
+        statusRoot.setText(getString(R.string.status_root_granted));
+        statusRoot.setTextColor(0xFF4CAF50);
+
+        keepaliveSection.setVisibility(View.VISIBLE);
+        dividerKeepalive.setVisibility(View.VISIBLE);
+
+        Toast.makeText(getContext(),
+                getString(R.string.toast_root_success),
+                Toast.LENGTH_SHORT).show();
+
+        refreshAppStatus();
+        doKeepAlive();
+    }
+
+    private void updateRootUI() {
+        if (AppRunningUtil.isRootGranted()) {
+            btnRequestRoot.setText(getString(R.string.btn_root_granted));
+            btnRequestRoot.setEnabled(false);
+            btnCheckStatus.setText(getString(R.string.btn_check_and_launch));
+            statusRoot.setText(getString(R.string.status_root_granted));
+            statusRoot.setTextColor(0xFF4CAF50);
+            keepaliveSection.setVisibility(View.VISIBLE);
+            dividerKeepalive.setVisibility(View.VISIBLE);
+        } else {
+            btnRequestRoot.setText(getString(R.string.btn_request_root));
+            btnRequestRoot.setEnabled(true);
+            btnCheckStatus.setText(getString(R.string.btn_check_app_status));
+            statusRoot.setText(getString(R.string.status_root_not_granted));
+            statusRoot.setTextColor(0xFF9E9E9E);
+            keepaliveSection.setVisibility(View.GONE);
+            dividerKeepalive.setVisibility(View.GONE);
+        }
+    }
+
+    private void doKeepAlive() {
+        if (!AppRunningUtil.isRootGranted()) return;
+
+        boolean kaSelf = cbSelf.isChecked();
+        boolean kaAlipay = cbAlipay.isChecked();
+        boolean kaWechat = cbWechat.isChecked();
+
+        String[] pids = AppRunningUtil.keepSelectedAlive(kaSelf, kaAlipay, kaWechat);
+
+        updatePidDisplay(pidSelf, kaSelf, pids[0]);
+        updatePidDisplay(pidAlipay, kaAlipay, pids[1]);
+        updatePidDisplay(pidWechat, kaWechat, pids[2]);
+    }
+
+    private void updatePidDisplay(TextView pidView, boolean enabled, String pid) {
+        if (!enabled) {
+            pidView.setText("");
+            return;
+        }
+        if (pid != null) {
+            pidView.setText("PID " + pid + "  " + getString(R.string.keepalive_protected));
+            pidView.setTextColor(0xFF4CAF50);
+        } else {
+            pidView.setText(getString(R.string.keepalive_not_running));
+            pidView.setTextColor(0xFFFF9800);
+        }
     }
 
     private void launchInactiveApps() {
@@ -92,8 +251,8 @@ public class HelloFragment extends Fragment {
         int launched = 0;
 
         String[][] apps = {
-                {AppRunningUtil.PKG_ALIPAY, getString(R.string.status_alipay_label).replace(": ", "")},
-                {AppRunningUtil.PKG_WECHAT, getString(R.string.status_wechat_label).replace(": ", "")}
+                {AppRunningUtil.PKG_ALIPAY, "Alipay"},
+                {AppRunningUtil.PKG_WECHAT, "WeChat"}
         };
 
         for (String[] app : apps) {
@@ -101,7 +260,7 @@ public class HelloFragment extends Fragment {
             if (status == AppRunningUtil.STATUS_INSTALLED_INACTIVE) {
                 if (AppRunningUtil.launchAppRoot(getContext(), app[0])) {
                     launched++;
-                    LogUtil.debugLog("Root 拉起: " + app[1]);
+                    LogUtil.debugLog("Root launch: " + app[1]);
                 }
             }
         }
@@ -112,8 +271,11 @@ public class HelloFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
             rootview.postDelayed(new Runnable() {
                 @Override
-                public void run() { refreshAppStatus(); }
-            }, 2000);
+                public void run() {
+                    refreshAppStatus();
+                    doKeepAlive();
+                }
+            }, 3000);
         } else {
             Toast.makeText(getContext(),
                     getString(R.string.toast_all_running),
@@ -129,11 +291,20 @@ public class HelloFragment extends Fragment {
         int wechatStatus = AppRunningUtil.getAppStatus(
                 getContext(), AppRunningUtil.PKG_WECHAT, ACTIVE_WINDOW_MINUTES);
 
-        boolean rooted = AppRunningUtil.hasRootAccess();
-        String method = rooted ? " [root]" : "";
+        boolean rooted = AppRunningUtil.isRootGranted();
 
-        statusAlipay.setText(getString(R.string.status_alipay_label) + getStatusText(alipayStatus) + method);
-        statusWechat.setText(getString(R.string.status_wechat_label) + getStatusText(wechatStatus) + method);
+        if (rooted) {
+            String alipayPid = AppRunningUtil.getProcessPid(AppRunningUtil.PKG_ALIPAY);
+            String wechatPid = AppRunningUtil.getProcessPid(AppRunningUtil.PKG_WECHAT);
+
+            statusAlipay.setText(getString(R.string.status_alipay_label) + getStatusText(alipayStatus)
+                    + (alipayPid != null ? "  PID:" + alipayPid : ""));
+            statusWechat.setText(getString(R.string.status_wechat_label) + getStatusText(wechatStatus)
+                    + (wechatPid != null ? "  PID:" + wechatPid : ""));
+        } else {
+            statusAlipay.setText(getString(R.string.status_alipay_label) + getStatusText(alipayStatus));
+            statusWechat.setText(getString(R.string.status_wechat_label) + getStatusText(wechatStatus));
+        }
 
         setStatusColor(statusAlipay, alipayStatus);
         setStatusColor(statusWechat, wechatStatus);
@@ -170,21 +341,23 @@ public class HelloFragment extends Fragment {
         }
     }
 
-    private void setTextWithNumofpush(){
-        numofpush.setText("推送次数"+preference.getNumOfPush());
+    private void setTextWithNumofpush() {
+        numofpush.setText("推送次数" + preference.getNumOfPush());
     }
-    private void setTextWithPosturl(){
-        if(preference.getPostUrl()!=null)
-            posturl.setText("目前的推送地址："+preference.getPostUrl());
 
+    private void setTextWithPosturl() {
+        if (preference.getPostUrl() != null)
+            posturl.setText("目前的推送地址：" + preference.getPostUrl());
     }
-    private void resetText(){
+
+    private void resetText() {
         setTextWithPosturl();
         setTextWithNumofpush();
     }
-    private void subMessage(){
+
+    private void subMessage() {
         LiveEventBus
-                .get("message_finished_one_post",String[].class)
+                .get("message_finished_one_post", String[].class)
                 .observeForever(new Observer<String[]>() {
                     @Override
                     public void onChanged(@Nullable String[] testpostbean) {
@@ -192,7 +365,7 @@ public class HelloFragment extends Fragment {
                     }
                 });
         LiveEventBus
-                .get("user_set_posturl",String.class)
+                .get("user_set_posturl", String.class)
                 .observeForever(new Observer<String>() {
                     @Override
                     public void onChanged(@Nullable String url) {
@@ -200,7 +373,7 @@ public class HelloFragment extends Fragment {
                     }
                 });
         LiveEventBus
-                .get("time_interval",String.class)
+                .get("time_interval", String.class)
                 .observeForever(new Observer<String>() {
                     @Override
                     public void onChanged(@Nullable String baseinterval) {
@@ -210,6 +383,5 @@ public class HelloFragment extends Fragment {
                         resetText();
                     }
                 });
-
     }
 }

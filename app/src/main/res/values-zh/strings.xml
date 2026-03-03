@@ -20,8 +20,26 @@
         <string name="status_unknown">未知 (需授权)</string>
         <string name="btn_check_app_status">刷新状态</string>
         <string name="btn_check_and_launch">检测并拉起</string>
+        <string name="btn_request_root">启用 Root</string>
+        <string name="btn_requesting_root">等待授权...</string>
+        <string name="btn_root_granted">Root 已启用</string>
+        <string name="status_root_granted">Root: 已授权 (进程级检测 + 服务保活)</string>
+        <string name="status_root_not_granted">Root: 未启用 (点击左侧按钮请求授权)</string>
+        <string name="status_root_denied">Root: 授权失败 (请在 Magisk 中允许)</string>
         <string name="toast_grant_usage_permission">请在设置中授予「使用情况访问」权限以检测应用运行状态</string>
         <string name="toast_status_refreshed">状态已刷新</string>
         <string name="toast_launched_apps">已通过 root 拉起 %d 个应用</string>
         <string name="toast_all_running">所有支付应用均在运行中</string>
+        <string name="toast_root_requesting">正在请求 root 权限，请在 Magisk 弹窗中点击允许...</string>
+        <string name="toast_root_success">Root 授权成功，已启用进程级检测和服务保活</string>
+        <string name="toast_root_failed">Root 授权失败，请确认 Magisk 已安装并允许本应用</string>
+        <string name="toast_root_already">Root 已启用</string>
+        <string name="keepalive_title">Root 保活</string>
+        <string name="keepalive_desc">勾选要保护的应用，防止被系统杀掉 (每分钟自动刷新)</string>
+        <string name="keepalive_self">本应用</string>
+        <string name="keepalive_alipay">支付宝</string>
+        <string name="keepalive_wechat">微信</string>
+        <string name="keepalive_protected">已保护</string>
+        <string name="keepalive_not_running">未运行</string>
+        <string name="keepalive_off">保活已关闭</string>
 </resources>

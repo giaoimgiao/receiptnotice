@@ -8,6 +8,9 @@ import android.content.BroadcastReceiver;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 import com.tao.admin.loglib.TLogApplication;
 import com.tao.admin.loglib.IConfig;
+import android.preference.PreferenceManager;
+
+import com.weihuagu.receiptnotice.util.AppRunningUtil;
 import com.weihuagu.receiptnotice.util.LogUtil;
 import com.weihuagu.receiptnotice.util.message.MessageSendBus;
 
@@ -62,6 +65,16 @@ public class MainApplication extends Application {
                     if (action.equals(Intent.ACTION_TIME_TICK)) {
                         LogUtil.debugLog("接受到一分钟广播action_time_tick事件");
                         MessageSendBus.postBaseTimeInterval();
+                        if (AppRunningUtil.isRootGranted()) {
+                            android.content.SharedPreferences sp =
+                                    PreferenceManager.getDefaultSharedPreferences(context);
+                            boolean kaSelf = sp.getBoolean(AppRunningUtil.PREF_KA_SELF, false);
+                            boolean kaAlipay = sp.getBoolean(AppRunningUtil.PREF_KA_ALIPAY, false);
+                            boolean kaWechat = sp.getBoolean(AppRunningUtil.PREF_KA_WECHAT, false);
+                            if (kaSelf || kaAlipay || kaWechat) {
+                                AppRunningUtil.keepSelectedAlive(kaSelf, kaAlipay, kaWechat);
+                            }
+                        }
                     }
                 }
             };

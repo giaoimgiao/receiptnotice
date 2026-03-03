@@ -20,10 +20,28 @@
         <string name="status_unknown">Unknown (grant permission)</string>
         <string name="btn_check_app_status">Refresh Status</string>
         <string name="btn_check_and_launch">Check &amp; Launch</string>
+        <string name="btn_request_root">Enable Root</string>
+        <string name="btn_requesting_root">Requesting...</string>
+        <string name="btn_root_granted">Root Enabled</string>
+        <string name="status_root_granted">Root: Granted (process detection + keep-alive)</string>
+        <string name="status_root_not_granted">Root: Not enabled (tap button to request)</string>
+        <string name="status_root_denied">Root: Denied (allow in Magisk)</string>
         <string name="toast_grant_usage_permission">Please grant Usage Access permission in Settings to detect app status</string>
         <string name="toast_status_refreshed">Status refreshed</string>
         <string name="toast_launched_apps">Launched %d app(s) via root</string>
         <string name="toast_all_running">All payment apps are running</string>
+        <string name="toast_root_requesting">Requesting root, please tap Allow in Magisk dialog...</string>
+        <string name="toast_root_success">Root granted, process detection and keep-alive enabled</string>
+        <string name="toast_root_failed">Root denied, make sure Magisk is installed and allows this app</string>
+        <string name="toast_root_already">Root already enabled</string>
+        <string name="keepalive_title">Root Keep-Alive</string>
+        <string name="keepalive_desc">Select apps to protect from being killed by system (refreshes every minute)</string>
+        <string name="keepalive_self">This App</string>
+        <string name="keepalive_alipay">Alipay</string>
+        <string name="keepalive_wechat">WeChat</string>
+        <string name="keepalive_protected">Protected</string>
+        <string name="keepalive_not_running">Not running</string>
+        <string name="keepalive_off">Keep-alive disabled</string>
         <string-array name="pref_entries_encryptmethod">
                 <item>des</item>
                 <item>md5</item>
