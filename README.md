@@ -48,7 +48,9 @@ python server.py --port 5000
 
 ### 2. 安装 App
 
-从 [Releases](https://github.com/giaoimgiao/receiptnotice/releases) 下载 APK 安装，或自行通过 GitHub Actions 构建。
+**[>>> 点击下载最新 APK <<<](https://github.com/giaoimgiao/receiptnotice/releases/latest/download/app-debug.apk)**
+
+或前往 [Releases](https://github.com/giaoimgiao/receiptnotice/releases) 页面查看所有版本。
 
 ### 3. 配置 App
 
