@@ -42,6 +42,26 @@
         <string name="keepalive_protected">Protected</string>
         <string name="keepalive_not_running">Not running</string>
         <string name="keepalive_off">Keep-alive disabled</string>
+        <string name="keepalive_interval_label">Refresh interval</string>
+        <string name="keepalive_next_refresh">Next refresh: ~%d min</string>
+        <string-array name="keepalive_interval_entries">
+                <item>1 min</item>
+                <item>2 min</item>
+                <item>3 min</item>
+                <item>5 min</item>
+                <item>10 min</item>
+                <item>15 min</item>
+                <item>30 min</item>
+        </string-array>
+        <string-array name="keepalive_interval_values">
+                <item>1</item>
+                <item>2</item>
+                <item>3</item>
+                <item>5</item>
+                <item>10</item>
+                <item>15</item>
+                <item>30</item>
+        </string-array>
         <string-array name="pref_entries_encryptmethod">
                 <item>des</item>
                 <item>md5</item>

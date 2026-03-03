@@ -265,6 +265,22 @@ public class AppRunningUtil {
     public static final String PREF_KA_SELF = "keepalive_self";
     public static final String PREF_KA_ALIPAY = "keepalive_alipay";
     public static final String PREF_KA_WECHAT = "keepalive_wechat";
+    public static final String PREF_KA_INTERVAL = "keepalive_interval";
+    public static final int DEFAULT_INTERVAL = 1;
+
+    private static final int[] INTERVAL_VALUES = {1, 2, 3, 5, 10, 15, 30};
+
+    public static int getIntervalByIndex(int index) {
+        if (index >= 0 && index < INTERVAL_VALUES.length) return INTERVAL_VALUES[index];
+        return DEFAULT_INTERVAL;
+    }
+
+    public static int getIndexByInterval(int interval) {
+        for (int i = 0; i < INTERVAL_VALUES.length; i++) {
+            if (INTERVAL_VALUES[i] == interval) return i;
+        }
+        return 0;
+    }
 
     /**
      * 按需保活选中的应用。

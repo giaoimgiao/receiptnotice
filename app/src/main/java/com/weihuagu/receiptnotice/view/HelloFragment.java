@@ -6,10 +6,12 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +41,8 @@ public class HelloFragment extends Fragment {
     private TextView pidSelf;
     private TextView pidAlipay;
     private TextView pidWechat;
+    private Spinner spinnerInterval;
+    private TextView nextRefreshText;
     private LinearLayout keepaliveSection;
     private View dividerKeepalive;
 
@@ -89,6 +93,8 @@ public class HelloFragment extends Fragment {
         pidSelf = (TextView) rootview.findViewById(R.id.pid_self);
         pidAlipay = (TextView) rootview.findViewById(R.id.pid_alipay);
         pidWechat = (TextView) rootview.findViewById(R.id.pid_wechat);
+        spinnerInterval = (Spinner) rootview.findViewById(R.id.spinner_interval);
+        nextRefreshText = (TextView) rootview.findViewById(R.id.keepalive_next_refresh);
 
         btnCheckStatus = (Button) rootview.findViewById(R.id.btn_check_status);
         btnRequestRoot = (Button) rootview.findViewById(R.id.btn_request_root);
@@ -97,6 +103,22 @@ public class HelloFragment extends Fragment {
         cbSelf.setChecked(sp.getBoolean(AppRunningUtil.PREF_KA_SELF, false));
         cbAlipay.setChecked(sp.getBoolean(AppRunningUtil.PREF_KA_ALIPAY, false));
         cbWechat.setChecked(sp.getBoolean(AppRunningUtil.PREF_KA_WECHAT, false));
+
+        int savedInterval = sp.getInt(AppRunningUtil.PREF_KA_INTERVAL, AppRunningUtil.DEFAULT_INTERVAL);
+        spinnerInterval.setSelection(AppRunningUtil.getIndexByInterval(savedInterval));
+        spinnerInterval.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                int interval = AppRunningUtil.getIntervalByIndex(position);
+                getPrefs().edit()
+                        .putInt(AppRunningUtil.PREF_KA_INTERVAL, interval)
+                        .apply();
+                updateNextRefreshText(interval);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         CompoundButton.OnCheckedChangeListener kaListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -180,6 +202,15 @@ public class HelloFragment extends Fragment {
         return PreferenceManager.getDefaultSharedPreferences(getContext());
     }
 
+    private void updateNextRefreshText(int intervalMinutes) {
+        boolean anyChecked = cbSelf.isChecked() || cbAlipay.isChecked() || cbWechat.isChecked();
+        if (anyChecked) {
+            nextRefreshText.setText(getString(R.string.keepalive_next_refresh, intervalMinutes));
+        } else {
+            nextRefreshText.setText(getString(R.string.keepalive_off));
+        }
+    }
+
     private void onRootGranted() {
         btnRequestRoot.setText(getString(R.string.btn_root_granted));
         btnRequestRoot.setEnabled(false);
@@ -230,6 +261,9 @@ public class HelloFragment extends Fragment {
         updatePidDisplay(pidSelf, kaSelf, pids[0]);
         updatePidDisplay(pidAlipay, kaAlipay, pids[1]);
         updatePidDisplay(pidWechat, kaWechat, pids[2]);
+
+        int interval = getPrefs().getInt(AppRunningUtil.PREF_KA_INTERVAL, AppRunningUtil.DEFAULT_INTERVAL);
+        updateNextRefreshText(interval);
     }
 
     private void updatePidDisplay(TextView pidView, boolean enabled, String pid) {

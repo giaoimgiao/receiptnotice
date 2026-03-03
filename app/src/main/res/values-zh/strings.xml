@@ -42,4 +42,15 @@
         <string name="keepalive_protected">已保护</string>
         <string name="keepalive_not_running">未运行</string>
         <string name="keepalive_off">保活已关闭</string>
+        <string name="keepalive_interval_label">刷新间隔</string>
+        <string name="keepalive_next_refresh">下次刷新: 约 %d 分钟后</string>
+        <string-array name="keepalive_interval_entries">
+                <item>1 分钟</item>
+                <item>2 分钟</item>
+                <item>3 分钟</item>
+                <item>5 分钟</item>
+                <item>10 分钟</item>
+                <item>15 分钟</item>
+                <item>30 分钟</item>
+        </string-array>
 </resources>

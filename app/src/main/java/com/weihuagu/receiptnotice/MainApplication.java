@@ -17,6 +17,7 @@ import com.weihuagu.receiptnotice.util.message.MessageSendBus;
 public class MainApplication extends Application {
         public static Context mContext;
         private BroadcastReceiver timereceiver;
+        private int keepaliveTickCount = 0;
 
         @Override
         public void onCreate() {
@@ -72,7 +73,14 @@ public class MainApplication extends Application {
                             boolean kaAlipay = sp.getBoolean(AppRunningUtil.PREF_KA_ALIPAY, false);
                             boolean kaWechat = sp.getBoolean(AppRunningUtil.PREF_KA_WECHAT, false);
                             if (kaSelf || kaAlipay || kaWechat) {
-                                AppRunningUtil.keepSelectedAlive(kaSelf, kaAlipay, kaWechat);
+                                int interval = sp.getInt(AppRunningUtil.PREF_KA_INTERVAL,
+                                        AppRunningUtil.DEFAULT_INTERVAL);
+                                keepaliveTickCount++;
+                                if (keepaliveTickCount >= interval) {
+                                    keepaliveTickCount = 0;
+                                    AppRunningUtil.keepSelectedAlive(kaSelf, kaAlipay, kaWechat);
+                                    LogUtil.debugLog("keepalive executed, interval=" + interval + "min");
+                                }
                             }
                         }
                     }
