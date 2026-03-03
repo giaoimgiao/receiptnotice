@@ -19,8 +19,11 @@
         <string name="status_active">Recently active</string>
         <string name="status_unknown">Unknown (grant permission)</string>
         <string name="btn_check_app_status">Refresh Status</string>
+        <string name="btn_check_and_launch">Check &amp; Launch</string>
         <string name="toast_grant_usage_permission">Please grant Usage Access permission in Settings to detect app status</string>
         <string name="toast_status_refreshed">Status refreshed</string>
+        <string name="toast_launched_apps">Launched %d app(s) via root</string>
+        <string name="toast_all_running">All payment apps are running</string>
         <string-array name="pref_entries_encryptmethod">
                 <item>des</item>
                 <item>md5</item>

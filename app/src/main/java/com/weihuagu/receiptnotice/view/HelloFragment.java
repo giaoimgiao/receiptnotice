@@ -59,10 +59,19 @@ public class HelloFragment extends Fragment {
         statusAlipay = (TextView) rootview.findViewById(R.id.status_alipay);
         statusWechat = (TextView) rootview.findViewById(R.id.status_wechat);
         btnCheckStatus = (Button) rootview.findViewById(R.id.btn_check_status);
+
+        boolean rooted = AppRunningUtil.hasRootAccess();
+        if (rooted) {
+            btnCheckStatus.setText(getString(R.string.btn_check_and_launch));
+        }
+
         btnCheckStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!AppRunningUtil.hasUsageStatsPermission(getContext())) {
+                if (AppRunningUtil.hasRootAccess()) {
+                    refreshAppStatus();
+                    launchInactiveApps();
+                } else if (!AppRunningUtil.hasUsageStatsPermission(getContext())) {
                     AppRunningUtil.requestUsageStatsPermission(getContext());
                     Toast.makeText(getContext(),
                             getString(R.string.toast_grant_usage_permission),
@@ -78,6 +87,40 @@ public class HelloFragment extends Fragment {
         refreshAppStatus();
     }
 
+    private void launchInactiveApps() {
+        if (getContext() == null) return;
+        int launched = 0;
+
+        String[][] apps = {
+                {AppRunningUtil.PKG_ALIPAY, getString(R.string.status_alipay_label).replace(": ", "")},
+                {AppRunningUtil.PKG_WECHAT, getString(R.string.status_wechat_label).replace(": ", "")}
+        };
+
+        for (String[] app : apps) {
+            int status = AppRunningUtil.getAppStatus(getContext(), app[0], ACTIVE_WINDOW_MINUTES);
+            if (status == AppRunningUtil.STATUS_INSTALLED_INACTIVE) {
+                if (AppRunningUtil.launchAppRoot(getContext(), app[0])) {
+                    launched++;
+                    LogUtil.debugLog("Root 拉起: " + app[1]);
+                }
+            }
+        }
+
+        if (launched > 0) {
+            Toast.makeText(getContext(),
+                    getString(R.string.toast_launched_apps, launched),
+                    Toast.LENGTH_SHORT).show();
+            rootview.postDelayed(new Runnable() {
+                @Override
+                public void run() { refreshAppStatus(); }
+            }, 2000);
+        } else {
+            Toast.makeText(getContext(),
+                    getString(R.string.toast_all_running),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void refreshAppStatus() {
         if (getContext() == null) return;
 
@@ -86,8 +129,11 @@ public class HelloFragment extends Fragment {
         int wechatStatus = AppRunningUtil.getAppStatus(
                 getContext(), AppRunningUtil.PKG_WECHAT, ACTIVE_WINDOW_MINUTES);
 
-        statusAlipay.setText(getString(R.string.status_alipay_label) + getStatusText(alipayStatus));
-        statusWechat.setText(getString(R.string.status_wechat_label) + getStatusText(wechatStatus));
+        boolean rooted = AppRunningUtil.hasRootAccess();
+        String method = rooted ? " [root]" : "";
+
+        statusAlipay.setText(getString(R.string.status_alipay_label) + getStatusText(alipayStatus) + method);
+        statusWechat.setText(getString(R.string.status_wechat_label) + getStatusText(wechatStatus) + method);
 
         setStatusColor(statusAlipay, alipayStatus);
         setStatusColor(statusWechat, wechatStatus);

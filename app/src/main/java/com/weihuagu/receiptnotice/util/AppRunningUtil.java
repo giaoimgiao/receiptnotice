@@ -8,10 +8,16 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 
 public class AppRunningUtil {
+
+    private static final String TAG = "AppRunningUtil";
 
     public static final String PKG_ALIPAY = "com.eg.android.AlipayGphone";
     public static final String PKG_WECHAT = "com.tencent.mm";
@@ -21,6 +27,8 @@ public class AppRunningUtil {
     public static final int STATUS_INSTALLED_INACTIVE = 1;
     public static final int STATUS_RECENTLY_ACTIVE = 2;
     public static final int STATUS_UNKNOWN = -1;
+
+    private static Boolean sHasRoot = null;
 
     public static boolean isAppInstalled(Context context, String packageName) {
         try {
@@ -33,15 +41,18 @@ public class AppRunningUtil {
 
     /**
      * 检测目标 App 的运行状态。
-     * API 21+ 使用 UsageStatsManager 检查近 N 分钟内是否活跃；
-     * API < 21 回退到 ActivityManager.getRunningAppProcesses()。
-     *
-     * @param minutes 判定"近期活跃"的时间窗口（分钟）
-     * @return STATUS_NOT_INSTALLED / STATUS_INSTALLED_INACTIVE / STATUS_RECENTLY_ACTIVE / STATUS_UNKNOWN
+     * 优先使用 root (pidof) 精确检测进程；
+     * 无 root 时回退到 UsageStatsManager / ActivityManager。
      */
     public static int getAppStatus(Context context, String packageName, int minutes) {
         if (!isAppInstalled(context, packageName)) {
             return STATUS_NOT_INSTALLED;
+        }
+
+        if (hasRootAccess()) {
+            return isProcessAliveRoot(packageName)
+                    ? STATUS_RECENTLY_ACTIVE
+                    : STATUS_INSTALLED_INACTIVE;
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -57,6 +68,67 @@ public class AppRunningUtil {
                 ? STATUS_RECENTLY_ACTIVE
                 : STATUS_INSTALLED_INACTIVE;
     }
+
+    // -------------------------------------------------------------------------
+    // Root 相关
+    // -------------------------------------------------------------------------
+
+    public static boolean hasRootAccess() {
+        if (sHasRoot != null) return sHasRoot;
+        try {
+            Process p = Runtime.getRuntime().exec("su -c id");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line = reader.readLine();
+            p.waitFor();
+            reader.close();
+            sHasRoot = (line != null && line.contains("uid=0"));
+        } catch (Exception e) {
+            sHasRoot = false;
+        }
+        Log.d(TAG, "hasRootAccess: " + sHasRoot);
+        return sHasRoot;
+    }
+
+    /** 通过 root 执行 pidof 检测进程是否存活 */
+    private static boolean isProcessAliveRoot(String packageName) {
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"su", "-c", "pidof " + packageName});
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line = reader.readLine();
+            p.waitFor();
+            reader.close();
+            return line != null && !line.trim().isEmpty();
+        } catch (Exception e) {
+            Log.w(TAG, "pidof failed", e);
+            return false;
+        }
+    }
+
+    /** 通过 root 启动指定 App 的 Launch Activity */
+    public static boolean launchAppRoot(Context context, String packageName) {
+        try {
+            PackageManager pm = context.getPackageManager();
+            Intent launchIntent = pm.getLaunchIntentForPackage(packageName);
+            if (launchIntent == null) return false;
+            String component = launchIntent.getComponent().flattenToShortString();
+            Process p = Runtime.getRuntime().exec(new String[]{
+                    "su", "-c", "am start -n " + component});
+            p.waitFor();
+            return p.exitValue() == 0;
+        } catch (Exception e) {
+            Log.w(TAG, "launchAppRoot failed", e);
+            return false;
+        }
+    }
+
+    /** 重置 root 检测缓存（换设备/刷机后可调用） */
+    public static void resetRootCache() {
+        sHasRoot = null;
+    }
+
+    // -------------------------------------------------------------------------
+    // 非 root 回退方案
+    // -------------------------------------------------------------------------
 
     public static boolean hasUsageStatsPermission(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

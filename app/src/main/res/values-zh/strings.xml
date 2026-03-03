@@ -19,6 +19,9 @@
         <string name="status_active">近期活跃</string>
         <string name="status_unknown">未知 (需授权)</string>
         <string name="btn_check_app_status">刷新状态</string>
+        <string name="btn_check_and_launch">检测并拉起</string>
         <string name="toast_grant_usage_permission">请在设置中授予「使用情况访问」权限以检测应用运行状态</string>
         <string name="toast_status_refreshed">状态已刷新</string>
+        <string name="toast_launched_apps">已通过 root 拉起 %d 个应用</string>
+        <string name="toast_all_running">所有支付应用均在运行中</string>
 </resources>
