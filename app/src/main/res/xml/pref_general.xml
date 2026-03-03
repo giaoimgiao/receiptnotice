@@ -130,11 +130,20 @@
                 android:summary="关于"
                 android:title="关于">
                 <Preference
-                        android:title="github地址">
+                        android:title="GitHub"
+                        android:summary="项目仓库">
                         <intent
                                 android:action="android.intent.action.VIEW"
                                 android:category="android.intent.category.DEFAULT"
-                                android:data="https://github.com/WeihuaGu/receiptnotice"/>
+                                android:data="https://github.com/giaoimgiao/receiptnotice"/>
+                </Preference>
+                <Preference
+                        android:title="交流群"
+                        android:summary="点击加入 QQ 群">
+                        <intent
+                                android:action="android.intent.action.VIEW"
+                                android:category="android.intent.category.DEFAULT"
+                                android:data="https://qun.qq.com/universal-share/share?ac=1&amp;authKey=nke7h4EKjyCOhcfEUKykuj6tmORdgmuVMO5the7h9ixlQBjuPniCUlGtoJuKdmsQM"/>
                 </Preference>
         </PreferenceCategory>
 
