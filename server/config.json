@@ -1,0 +1,10 @@
+{
+    "host": "0.0.0.0",
+    "port": 5000,
+    "secret": "",
+    "db_path": "data/receipts.db",
+    "log_file": "data/server.log",
+    "web_password": "",
+    "api_token": "",
+    "webhook_urls": []
+}

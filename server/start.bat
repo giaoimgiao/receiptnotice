@@ -1,57 +1,40 @@
 @echo off
-title Receipt Notice Server
+title ReceiptNotice Server
 color 0A
 
-echo ============================================
-echo        Receipt Notice Server - Start
-echo ============================================
+echo ==================================================
+echo        ReceiptNotice Server - One Click Start
+echo ==================================================
 echo.
 
 :: Detect Python
-echo [1/4] Detecting Python...
+echo [1/3] Detecting Python...
 set PYTHON=
 
 py --version >nul 2>&1
-if %errorlevel% equ 0 (
-    set PYTHON=py
-)
+if %errorlevel% equ 0 set PYTHON=py
 if "%PYTHON%"=="" (
     python --version >nul 2>&1
-    if %errorlevel% equ 0 (
-        set PYTHON=python
-    )
+    if %errorlevel% equ 0 set PYTHON=python
 )
 if "%PYTHON%"=="" (
     python3 --version >nul 2>&1
-    if %errorlevel% equ 0 (
-        set PYTHON=python3
-    )
+    if %errorlevel% equ 0 set PYTHON=python3
 )
 if "%PYTHON%"=="" (
-    echo [ERROR] Python not found! Install Python 3.7+
-    echo         https://www.python.org/downloads/
-    echo         Check "Add Python to PATH" when installing
+    echo [ERROR] Python not found!
+    echo         Install Python 3.7+ from https://www.python.org/downloads/
+    echo         Make sure to check "Add Python to PATH"
     echo.
     pause
     exit /b 1
 )
-
 echo Found: %PYTHON%
 %PYTHON% --version
 echo.
 
-:: Check pip
-echo [2/4] Checking pip...
-%PYTHON% -m pip --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo pip not available, trying to install...
-    %PYTHON% -m ensurepip --default-pip
-)
-echo pip OK
-echo.
-
 :: Install dependencies
-echo [3/4] Checking dependencies...
+echo [2/3] Checking dependencies...
 %PYTHON% -c "import flask" >nul 2>&1
 if %errorlevel% neq 0 (
     echo Installing flask...
@@ -65,40 +48,12 @@ if %errorlevel% neq 0 (
 echo Dependencies OK
 echo.
 
-:: Read config
-set PORT=5000
-set SECRET=
-
-if exist "%~dp0config.txt" (
-    for /f "usebackq tokens=1,* delims==" %%a in ("%~dp0config.txt") do (
-        if "%%a"=="PORT" set PORT=%%b
-        if "%%a"=="SECRET" set SECRET=%%b
-    )
-)
-
 :: Start server
-echo [4/4] Starting server...
-echo ============================================
-echo   Port: %PORT%
-if "%SECRET%"=="" (
-    echo   Encrypt: OFF
-) else (
-    echo   Encrypt: ON
-)
-echo.
-echo   Web UI:    http://localhost:%PORT%
-echo   Push API:  http://YOUR_IP:%PORT%/api/receive
-echo   Records:   http://YOUR_IP:%PORT%/api/records
-echo ============================================
-echo.
-echo   Press Ctrl+C to stop
+echo [3/3] Starting server...
+echo Config: %~dp0config.json
 echo.
 
-if "%SECRET%"=="" (
-    %PYTHON% "%~dp0server.py" --port %PORT%
-) else (
-    %PYTHON% "%~dp0server.py" --port %PORT% --secret %SECRET%
-)
+%PYTHON% "%~dp0server.py"
 
 echo.
 echo Server stopped.
