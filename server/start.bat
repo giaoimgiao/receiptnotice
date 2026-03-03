@@ -8,23 +8,32 @@ echo        收款通知服务端 - 一键启动
 echo ============================================
 echo.
 
-:: 检测 Python
+:: 检测 Python (优先 python, 其次 py, 最后 python3)
 echo [1/4] 检测 Python 环境...
+set PYTHON=
 where python >nul 2>&1
-if %errorlevel% neq 0 (
-    where python3 >nul 2>&1
-    if %errorlevel% neq 0 (
-        echo [错误] 未检测到 Python，请先安装 Python 3.7+
-        echo        下载地址: https://www.python.org/downloads/
-        echo        安装时务必勾选 "Add Python to PATH"
-        echo.
-        pause
-        exit /b 1
-    )
-    set PYTHON=python3
-) else (
+if %errorlevel% equ 0 (
     set PYTHON=python
+    goto :python_found
 )
+where py >nul 2>&1
+if %errorlevel% equ 0 (
+    set PYTHON=py
+    goto :python_found
+)
+where python3 >nul 2>&1
+if %errorlevel% equ 0 (
+    set PYTHON=python3
+    goto :python_found
+)
+echo [错误] 未检测到 Python，请先安装 Python 3.7+
+echo        下载地址: https://www.python.org/downloads/
+echo        安装时务必勾选 "Add Python to PATH"
+echo.
+pause
+exit /b 1
+
+:python_found
 
 %PYTHON% --version
 echo.
