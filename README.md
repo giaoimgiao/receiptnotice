@@ -2,7 +2,7 @@
 
 手机收到支付宝、微信、银联等收款通知时，自动将信息推送到你指定的服务器。支持 root 设备自动检测并拉起支付应用。
 
-本项目基于 [WeihuaGu/receiptnotice](https://github.com/WeihuaGu/receiptnotice) 二次开发，升级构建工具链，新增 Python 服务端和 root 增强功能。
+本项目基于 [WeihuaGu/receiptnotice]升级构建工具链，新增 Python 服务端和 root 增强功能。
 
 ---
 
