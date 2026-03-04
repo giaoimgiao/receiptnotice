@@ -27,8 +27,8 @@ public class AlipayPmentayNotificationHandle extends PmentayNotificationHandle i
 
         }
         public void handleNotification(){
-                if(title.contains("支付宝") | title.contains("收钱码") | title.contains("收款通知")){
-                        //不可将转账判断延后放，以防止通过昵称虚构金额
+                if(title.contains("支付宝") | title.contains("收钱码") | title.contains("收款通知")
+                        | title.contains("成功收款") | title.contains("向你付款")){
                         if(content.contains("向你转了1笔钱")){
                                 transfercodePush();
 				return ;
@@ -36,6 +36,10 @@ public class AlipayPmentayNotificationHandle extends PmentayNotificationHandle i
 
                         if(content.contains("成功收款") | content.contains("向你付款")){
                                 collectioncodePush(true);
+                                return ;
+                        }
+                        if(title.contains("成功收款") | title.contains("向你付款")){
+                                collectioncodePush(false);
                                 return ;
                         }
                 }
