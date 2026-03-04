@@ -118,4 +118,14 @@ public class PreferenceUtil {
         return this.sharedPref.getString("echo_custom_option", "");
     }
 
+    public String getCustomApps() {
+        return this.sharedPref.getString("custom_apps", "");
+    }
+
+    public void setCustomApps(String json) {
+        SharedPreferences.Editor edit = this.sharedPref.edit();
+        edit.putString("custom_apps", json);
+        edit.apply();
+    }
+
 }

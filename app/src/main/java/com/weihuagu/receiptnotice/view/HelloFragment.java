@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -22,9 +23,15 @@ import androidx.lifecycle.Observer;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 import com.weihuagu.receiptnotice.MainApplication;
 import com.weihuagu.receiptnotice.R;
+import com.weihuagu.receiptnotice.action.HandlePost;
 import com.weihuagu.receiptnotice.util.AppRunningUtil;
 import com.weihuagu.receiptnotice.util.LogUtil;
 import com.weihuagu.receiptnotice.util.PreferenceUtil;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HelloFragment extends Fragment {
     private TextView numofpush;
@@ -46,8 +53,15 @@ public class HelloFragment extends Fragment {
     private LinearLayout keepaliveSection;
     private View dividerKeepalive;
 
+    private EditText manualAmount;
+    private EditText manualRemark;
+    private Spinner manualTypeSpinner;
+    private Button btnManualPush;
+
     private View rootview;
     private PreferenceUtil preference;
+
+    private static final String[] MANUAL_TYPE_VALUES = {"alipay-manual", "wechat-manual", "custom-manual"};
 
     private static final int ACTIVE_WINDOW_MINUTES = 10;
 
@@ -191,6 +205,18 @@ public class HelloFragment extends Fragment {
                         }
                     }
                 });
+            }
+        });
+
+        manualAmount = (EditText) rootview.findViewById(R.id.manual_amount);
+        manualRemark = (EditText) rootview.findViewById(R.id.manual_remark);
+        manualTypeSpinner = (Spinner) rootview.findViewById(R.id.manual_type_spinner);
+        btnManualPush = (Button) rootview.findViewById(R.id.btn_manual_push);
+
+        btnManualPush.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doManualPush();
             }
         });
 
@@ -387,6 +413,68 @@ public class HelloFragment extends Fragment {
     private void resetText() {
         setTextWithPosturl();
         setTextWithNumofpush();
+    }
+
+    private void doManualPush() {
+        if (preference.getPostUrl() == null) {
+            Toast.makeText(getContext(),
+                    getString(R.string.manual_push_no_url),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String amountStr = manualAmount.getText().toString().trim();
+        if (amountStr.isEmpty()) {
+            Toast.makeText(getContext(),
+                    getString(R.string.manual_push_no_amount),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            Double.parseDouble(amountStr);
+        } catch (NumberFormatException e) {
+            Toast.makeText(getContext(),
+                    getString(R.string.manual_push_invalid_amount),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int typeIndex = manualTypeSpinner.getSelectedItemPosition();
+        String type = (typeIndex >= 0 && typeIndex < MANUAL_TYPE_VALUES.length)
+                ? MANUAL_TYPE_VALUES[typeIndex] : "custom-manual";
+
+        String remark = manualRemark.getText().toString().trim();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String time = sdf.format(new Date());
+
+        Map<String, String> postmap = new HashMap<String, String>();
+        postmap.put("type", type);
+        postmap.put("time", time);
+        postmap.put("title", getString(R.string.manual_push_title));
+        postmap.put("money", amountStr);
+        postmap.put("content", remark.isEmpty()
+                ? getString(R.string.manual_push_content, amountStr)
+                : remark);
+
+        btnManualPush.setEnabled(false);
+        btnManualPush.setText(getString(R.string.manual_push_sending));
+
+        new HandlePost().doPost(postmap);
+
+        rootview.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (getContext() == null) return;
+                btnManualPush.setEnabled(true);
+                btnManualPush.setText(getString(R.string.manual_push_btn));
+                manualAmount.setText("");
+                manualRemark.setText("");
+                Toast.makeText(getContext(),
+                        getString(R.string.manual_push_sent),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }, 1500);
     }
 
     private void subMessage() {

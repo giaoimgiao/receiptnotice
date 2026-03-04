@@ -71,4 +71,49 @@
                 <item>des</item>
                 <item>md5</item>
         </string-array>
+
+        <string name="custom_app_current_title">Monitored Apps</string>
+        <string name="custom_app_add_title">Add New Monitor</string>
+        <string name="custom_app_step1">Step 1: Select app to monitor</string>
+        <string name="custom_app_step2">Step 2: Set trigger keyword (optional)</string>
+        <string name="custom_app_step3">Step 3: Set push type label</string>
+        <string name="custom_app_pick_btn">Choose from installed apps</string>
+        <string name="custom_app_not_selected">No app selected</string>
+        <string name="custom_app_keyword_hint">Only push when notification contains this keyword. Leave empty to push all.</string>
+        <string name="custom_app_keyword_example">e.g. payment, receipt, transfer</string>
+        <string name="custom_app_type_hint">Used to identify the source in server. Auto-fills with app name.</string>
+        <string name="custom_app_type_example">Auto-fills with app name</string>
+        <string name="custom_app_add_btn">Add Monitor</string>
+        <string name="custom_app_picker_title">Select app to monitor</string>
+        <string name="custom_app_toast_select_first">Please select an app first</string>
+        <string name="custom_app_toast_already_exists">This app is already being monitored</string>
+        <string name="custom_app_toast_added">Added</string>
+        <string name="custom_app_toast_deleted">Deleted</string>
+        <string name="custom_app_toast_save_failed">Save failed</string>
+        <string name="custom_app_empty">No custom rules yet. Add one below.</string>
+        <string name="custom_app_rule_all">All notifications</string>
+        <string name="custom_app_rule_keyword">Keyword: %s</string>
+        <string name="custom_app_rule_type">Type: %s</string>
+        <string name="custom_app_delete">Delete</string>
+        <string name="custom_app_delete_confirm_title">Confirm Delete</string>
+        <string name="custom_app_delete_confirm_msg">Delete this monitor rule?</string>
+        <string name="custom_app_delete_yes">Delete</string>
+        <string name="custom_app_delete_no">Cancel</string>
+
+        <string name="manual_push_title">Manual Push</string>
+        <string name="manual_push_desc">Manually enter amount and push to server when auto-detection misses</string>
+        <string name="manual_push_amount_hint">Enter amount</string>
+        <string name="manual_push_remark_hint">Remark (optional)</string>
+        <string name="manual_push_btn">Push to Server</string>
+        <string name="manual_push_no_url">Please set the push URL first</string>
+        <string name="manual_push_no_amount">Please enter an amount</string>
+        <string name="manual_push_invalid_amount">Invalid amount format</string>
+        <string name="manual_push_sending">Sending...</string>
+        <string name="manual_push_sent">Push request sent</string>
+        <string name="manual_push_content">Manual push %s yuan</string>
+        <string-array name="manual_push_types">
+                <item>Alipay</item>
+                <item>WeChat</item>
+                <item>Other</item>
+        </string-array>
 </resources>

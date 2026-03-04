@@ -53,4 +53,49 @@
                 <item>15 分钟</item>
                 <item>30 分钟</item>
         </string-array>
+
+        <string name="custom_app_current_title">已监听的应用</string>
+        <string name="custom_app_add_title">添加新监听</string>
+        <string name="custom_app_step1">第一步: 选择要监听的应用</string>
+        <string name="custom_app_step2">第二步: 设置触发关键词 (可选)</string>
+        <string name="custom_app_step3">第三步: 设置推送类型标签</string>
+        <string name="custom_app_pick_btn">从已安装应用中选择</string>
+        <string name="custom_app_not_selected">未选择应用</string>
+        <string name="custom_app_keyword_hint">通知中包含此关键词才推送，留空则推送该应用所有通知</string>
+        <string name="custom_app_keyword_example">例如: 收款、到账、转入</string>
+        <string name="custom_app_type_hint">推送到服务器时用来区分来源，会自动填入应用名称</string>
+        <string name="custom_app_type_example">会自动填入应用名称</string>
+        <string name="custom_app_add_btn">添加监听</string>
+        <string name="custom_app_picker_title">选择要监听的应用</string>
+        <string name="custom_app_toast_select_first">请先选择要监听的应用</string>
+        <string name="custom_app_toast_already_exists">该应用已在监听列表中</string>
+        <string name="custom_app_toast_added">已添加</string>
+        <string name="custom_app_toast_deleted">已删除</string>
+        <string name="custom_app_toast_save_failed">保存失败</string>
+        <string name="custom_app_empty">暂无自定义监听规则，请在下方添加</string>
+        <string name="custom_app_rule_all">推送所有通知</string>
+        <string name="custom_app_rule_keyword">关键词: %s</string>
+        <string name="custom_app_rule_type">类型: %s</string>
+        <string name="custom_app_delete">删除</string>
+        <string name="custom_app_delete_confirm_title">确认删除</string>
+        <string name="custom_app_delete_confirm_msg">确定要删除这条监听规则吗？</string>
+        <string name="custom_app_delete_yes">删除</string>
+        <string name="custom_app_delete_no">取消</string>
+
+        <string name="manual_push_title">手动推送</string>
+        <string name="manual_push_desc">没有自动匹配到时，可以手动输入金额推送到服务器</string>
+        <string name="manual_push_amount_hint">输入金额</string>
+        <string name="manual_push_remark_hint">备注 (可选)</string>
+        <string name="manual_push_btn">推送到服务器</string>
+        <string name="manual_push_no_url">请先设置推送地址</string>
+        <string name="manual_push_no_amount">请输入金额</string>
+        <string name="manual_push_invalid_amount">金额格式不正确</string>
+        <string name="manual_push_sending">推送中...</string>
+        <string name="manual_push_sent">推送请求已发送</string>
+        <string name="manual_push_content">手动推送 %s 元</string>
+        <string-array name="manual_push_types">
+                <item>支付宝</item>
+                <item>微信</item>
+                <item>其他</item>
+        </string-array>
 </resources>
